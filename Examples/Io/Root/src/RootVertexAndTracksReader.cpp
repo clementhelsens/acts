@@ -24,10 +24,11 @@ FW::RootVertexAndTracksReader::RootVertexAndTracksReader(
       m_logger(Acts::getDefaultLogger("RootVertexAndTracksReader", lvl)) {
   m_inputChain = new TChain(m_cfg.treeName.c_str());
 
-  m_inputChain->SetBranchAddress("event_nr", &m_eventNr);
-  m_inputChain->SetBranchAddress("vx", &m_ptrVx);
-  m_inputChain->SetBranchAddress("vy", &m_ptrVy);
-  m_inputChain->SetBranchAddress("vz", &m_ptrVz);
+  //m_inputChain->SetBranchAddress("event_nr", &m_eventNr);
+  //m_inputChain->SetBranchAddress("vx", &m_ptrVx);
+  //m_inputChain->SetBranchAddress("vy", &m_ptrVy);
+  //m_inputChain->SetBranchAddress("vz", &m_ptrVz);
+  //m_inputChain->SetBranchAddress("vtxID", &m_ptrVtxID);
 
   m_inputChain->SetBranchAddress("d0", &m_ptrD0);
   m_inputChain->SetBranchAddress("z0", &m_ptrZ0);
@@ -35,7 +36,6 @@ FW::RootVertexAndTracksReader::RootVertexAndTracksReader(
   m_inputChain->SetBranchAddress("theta", &m_ptrTheta);
   m_inputChain->SetBranchAddress("qp", &m_ptrQP);
   m_inputChain->SetBranchAddress("time", &m_ptrTime);
-  m_inputChain->SetBranchAddress("vtxID", &m_ptrVtxID);
   m_inputChain->SetBranchAddress("trkCov", &m_ptrTrkCov);
 
   // loop over the input files
@@ -51,16 +51,16 @@ FW::RootVertexAndTracksReader::RootVertexAndTracksReader(
 }
 
 FW::RootVertexAndTracksReader::~RootVertexAndTracksReader() {
-  delete m_ptrVx;
-  delete m_ptrVy;
-  delete m_ptrVz;
+  //delete m_ptrVx;
+  //delete m_ptrVy;
+  //delete m_ptrVz;
   delete m_ptrD0;
   delete m_ptrZ0;
   delete m_ptrPhi;
   delete m_ptrTheta;
   delete m_ptrQP;
   delete m_ptrTime;
-  delete m_ptrVtxID;
+  //delete m_ptrVtxID;
   delete m_ptrTrkCov;
 }
 
@@ -82,7 +82,11 @@ FW::ProcessCode FW::RootVertexAndTracksReader::read(
     std::lock_guard<std::mutex> lock(m_read_mutex);
 
     // The collection to be written
-    std::vector<FW::VertexAndTracks> mCollection;
+    //ADDED CLEMENT
+    std::vector<Acts::BoundParameters> tracks;
+    //COMMENTED CLEMENT
+    //std::vector<FW::VertexAndTracks> mCollection;
+    //END COMMENTED CLEMENT
 
     for (size_t ib = 0; ib < m_cfg.batchSize; ++ib) {
       // Read the correct entry: batch size * event_number + ib
@@ -91,26 +95,45 @@ FW::ProcessCode FW::RootVertexAndTracksReader::read(
                                             ib);
 
       // Loop over all vertices
-      for (size_t idx = 0; idx < m_ptrVx->size(); ++idx) {
-        FW::VertexAndTracks vtxAndTracks;
-        vtxAndTracks.vertex.position4[0] = (*m_ptrVx)[idx];
-        vtxAndTracks.vertex.position4[1] = (*m_ptrVy)[idx];
-        vtxAndTracks.vertex.position4[2] = (*m_ptrVz)[idx];
-        vtxAndTracks.vertex.position4[3] = 0;
+      //COMMENTED CLEMENT
+      //for (size_t idx = 0; idx < m_ptrVx->size(); ++idx) {
+      //  FW::VertexAndTracks vtxAndTracks;
+      //  vtxAndTracks.vertex.position4[0] = (*m_ptrVx)[idx];
+      //  vtxAndTracks.vertex.position4[1] = (*m_ptrVy)[idx];
+      //  vtxAndTracks.vertex.position4[2] = (*m_ptrVz)[idx];
+      //  vtxAndTracks.vertex.position4[3] = 0;
 
-        std::vector<Acts::BoundParameters> tracks;
+      //  std::vector<Acts::BoundParameters> tracks;
+      //END COMMENTED CLEMENT
+      ACTS_VERBOSE(" number of tracks  " << m_ptrD0->size());
         // Loop over all tracks in current event
         for (size_t trkId = 0; trkId < m_ptrD0->size(); ++trkId) {
+
           // Take only tracks that belong to current vertex
-          if (static_cast<size_t>((*m_ptrVtxID)[trkId]) == idx) {
+	  //COMMENTED CLEMENT
+          //if (static_cast<size_t>((*m_ptrVtxID)[trkId]) == idx) {
+	  //END COMMENTED CLEMENT
+
             // Get track parameter
             Acts::BoundVector newTrackParams;
             newTrackParams << (*m_ptrD0)[trkId], (*m_ptrZ0)[trkId],
                 (*m_ptrPhi)[trkId], (*m_ptrTheta)[trkId], (*m_ptrQP)[trkId],
                 (*m_ptrTime)[trkId];
 
+	    ACTS_VERBOSE(" (*m_ptrD0)[trkId], (*m_ptrZ0)[trkId],(*m_ptrPhi)[trkId], (*m_ptrTheta)[trkId], (*m_ptrQP)[trkId],(*m_ptrTime)[trkId] " << (*m_ptrD0)[trkId] << "  " <<(*m_ptrZ0)[trkId] << "  " <<(*m_ptrPhi)[trkId] <<"  " << (*m_ptrTheta)[trkId] <<"  " << (*m_ptrQP)[trkId]<<"  " << (*m_ptrTime)[trkId]);
+
+
             // Get track covariance vector
             std::vector<double> trkCovVec = (*m_ptrTrkCov)[trkId];
+	    
+	    
+	    //std::fill(trkCovVec.begin(), trkCovVec.end(), 0);
+	    //trkCovVec.at(0)=0.001;
+	    //trkCovVec.at(7)=0.001;
+	    //trkCovVec.at(14)=0.001;
+	    //trkCovVec.at(21)=0.001;
+	    //trkCovVec.at(28)=0.001;
+	    //trkCovVec.at(35)=0.001;
 
             // Construct track covariance
             Acts::BoundSymMatrix covMat =
@@ -123,17 +146,25 @@ FW::ProcessCode FW::RootVertexAndTracksReader::read(
             tracks.push_back(
                 Acts::BoundParameters(context.geoContext, std::move(covMat),
                                       newTrackParams, perigeeSurface));
-          }
-        }  // End loop over all tracks
+	    //COMMENTED CLEMENT
+	    //}
+	    //END COMMENTED CLEMENT
+       }  // End loop over all tracks
         // Set tracks
-        vtxAndTracks.tracks = tracks;
+        //COMMENTED CLEMENT
+        //vtxAndTracks.tracks = tracks;
         // Add to collection
-        mCollection.push_back(std::move(vtxAndTracks));
-      }
-    }
+        //mCollection.push_back(std::move(vtxAndTracks));
+	//}
+	//END COMMENTED CLEMENT
 
+    }
     // Write to the collection to the EventStore
-    context.eventStore.add(m_cfg.outputCollection, std::move(mCollection));
+    //ADDED CLEMENT
+    context.eventStore.add(m_cfg.outputCollection, std::move(tracks));
+    //COMMENTED CLEMENT
+    //context.eventStore.add(m_cfg.outputCollection, std::move(mCollection));
+    //END COMMENTED CLEMENT
   }
   // Return success flag
   return FW::ProcessCode::SUCCESS;

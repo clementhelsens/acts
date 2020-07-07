@@ -131,15 +131,19 @@ std::vector<Acts::BoundParameters>
 FWE::AdaptiveMultiVertexFinderAlgorithm::getInputTrackCollection(
     const FW::AlgorithmContext& ctx) const {
   // Setup containers
-  const auto& input = ctx.eventStore.get<std::vector<FW::VertexAndTracks>>(
+  //ADDED CLEMENT
+  const auto& inputTrackCollection = ctx.eventStore.get<std::vector<Acts::BoundParameters>>(
       m_cfg.trackCollection);
-  std::vector<Acts::BoundParameters> inputTrackCollection;
 
-  for (auto& vertexAndTracks : input) {
-    inputTrackCollection.insert(inputTrackCollection.end(),
-                                vertexAndTracks.tracks.begin(),
-                                vertexAndTracks.tracks.end());
-  }
+  //  const auto& input = ctx.eventStore.get<std::vector<FW::VertexAndTracks>>(
+  //    m_cfg.trackCollection);
+  //std::vector<Acts::BoundParameters> inputTrackCollection;
+
+  //for (auto& vertexAndTracks : input) {
+  //  inputTrackCollection.insert(inputTrackCollection.end(),
+  //                              vertexAndTracks.tracks.begin(),
+  //                              vertexAndTracks.tracks.end());
+  //}
 
   return inputTrackCollection;
 }

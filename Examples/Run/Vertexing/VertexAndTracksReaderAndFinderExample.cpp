@@ -15,6 +15,7 @@
 #include "ACTFW/Options/CommonOptions.hpp"
 #include "ACTFW/Utilities/Paths.hpp"
 #include "ACTFW/Vertexing/IterativeVertexFinderAlgorithm.hpp"
+#include "ACTFW/Vertexing/AdaptiveMultiVertexFinderAlgorithm.hpp"
 
 using namespace FW;
 
@@ -53,9 +54,10 @@ int main(int argc, char* argv[]) {
   Acts::Vector3D bField(0., 0., 2. * Acts::units::_T);
 
   // Add the finding algorithm
-  FWE::IterativeVertexFinderAlgorithm::Config vertexFindingCfg;
+  //FWE::IterativeVertexFinderAlgorithm::Config vertexFindingCfg;
+  FWE::AdaptiveMultiVertexFinderAlgorithm::Config vertexFindingCfg;
   vertexFindingCfg.trackCollection = vtxAndTracksReaderCfg.outputCollection;
-  vertexFindingCfg.bField = bField;
+  //vertexFindingCfg.bField = bField;
 
   Sequencer::Config sequencerCfg = Options::readSequencerConfig(vm);
   Sequencer sequencer(sequencerCfg);
@@ -63,7 +65,7 @@ int main(int argc, char* argv[]) {
   sequencer.addReader(std::make_shared<RootVertexAndTracksReader>(
       vtxAndTracksReaderCfg, logLevel));
 
-  sequencer.addAlgorithm(std::make_shared<FWE::IterativeVertexFinderAlgorithm>(
+  sequencer.addAlgorithm(std::make_shared<FWE::AdaptiveMultiVertexFinderAlgorithm>(
       vertexFindingCfg, logLevel));
 
   return sequencer.run();

@@ -53,6 +53,7 @@ FW::ProcessCode FWE::IterativeVertexFinderAlgorithm::execute(
   using VertexSeeder = Acts::ZScanVertexFinder<VertexFitter>;
   using VertexFinder = Acts::IterativeVertexFinder<VertexFitter, VertexSeeder>;
   using VertexFinderOptions = Acts::VertexingOptions<TrackParameters>;
+  using namespace Acts::UnitLiterals;
 
   static_assert(Acts::VertexFinderConcept<VertexSeeder>,
                 "VertexSeeder does not fulfill vertex finder concept.");
@@ -60,7 +61,12 @@ FW::ProcessCode FWE::IterativeVertexFinderAlgorithm::execute(
                 "VertexFinder does not fulfill vertex finder concept.");
 
   // Set up the magnetic field
-  MagneticField bField(m_cfg.bField);
+  //MagneticField bField(m_cfg.bField);
+  //MagneticField bField(Acts::Vector3D(0., 0., -1*2_T));
+  MagneticField bField(Acts::Vector3D(0., 0., 2_T));
+
+
+
   // Set up propagator with void navigator
   auto propagator = std::make_shared<Propagator>(Stepper(bField));
   PropagatorOptions propagatorOpts(ctx.geoContext, ctx.magFieldContext);
@@ -85,27 +91,32 @@ FW::ProcessCode FWE::IterativeVertexFinderAlgorithm::execute(
   VertexFinderOptions finderOpts(ctx.geoContext, ctx.magFieldContext);
 
   // Setup containers
-  const auto& input = ctx.eventStore.get<std::vector<FW::VertexAndTracks>>(
+  //ADDED CLEMENT
+  const auto& inputTrackCollection = ctx.eventStore.get<std::vector<Acts::BoundParameters>>(
       m_cfg.trackCollection);
-  std::vector<Acts::BoundParameters> inputTrackCollection;
+  //COMMENTED CLEMENT
+  //const auto& input = ctx.eventStore.get<std::vector<FW::VertexAndTracks>>(
+  //    m_cfg.trackCollection);
+  //std::vector<Acts::BoundParameters> inputTrackCollection;
 
-  int counte = 0;
-  for (auto& bla : input) {
-    counte += bla.tracks.size();
-  }
+  //int counte = 0;
+  //for (auto& bla : input) {
+  //  counte += bla.tracks.size();
+  //}
 
-  ACTS_INFO("Truth vertices in event: " << input.size());
+  //ACTS_INFO("Truth vertices in event: " << input.size());
 
-  for (auto& vertexAndTracks : input) {
-    ACTS_INFO("\t True vertex at ("
-              << vertexAndTracks.vertex.position().x() << ","
-              << vertexAndTracks.vertex.position().y() << ","
-              << vertexAndTracks.vertex.position().z() << ") with "
-              << vertexAndTracks.tracks.size() << " tracks.");
-    inputTrackCollection.insert(inputTrackCollection.end(),
-                                vertexAndTracks.tracks.begin(),
-                                vertexAndTracks.tracks.end());
-  }
+  //for (auto& vertexAndTracks : input) {
+  //  ACTS_INFO("\t True vertex at ("
+  //            << vertexAndTracks.vertex.position().x() << ","
+  //            << vertexAndTracks.vertex.position().y() << ","
+  //            << vertexAndTracks.vertex.position().z() << ") with "
+  //            << vertexAndTracks.tracks.size() << " tracks.");
+  //  inputTrackCollection.insert(inputTrackCollection.end(),
+  //                              vertexAndTracks.tracks.begin(),
+  //                              vertexAndTracks.tracks.end());
+  //}
+  //END COMMENTED CLEMENT
 
   std::vector<const Acts::BoundParameters*> inputTrackPtrCollection;
   for (const auto& trk : inputTrackCollection) {
